@@ -3,11 +3,13 @@ import { useState, useRef, useCallback, useEffect } from "preact/hooks";
 import style from "./style.css";
 import Webcam from "react-webcam";
 import { useOpenCv } from "opencv-react";
+import { FormControlLabel, FormGroup, Switch } from "@mui/material";
 
 const Camera = () => {
   const webcamRef = useRef(null);
   const [imgSrc, setImgSrc] = useState(null);
   const { loaded, cv } = useOpenCv();
+  const [auto, setAuto] = useState(false);
   const [lowThreshold, setLowThreshold] = useState(200);
   const [highThreshold, setHighThreshold] = useState(255);
 
@@ -40,11 +42,12 @@ const Camera = () => {
 
   // Capture an image every second.
   useEffect(() => {
+    if (!auto) return;
     const interval = setInterval(() => {
       captureHandler();
-    }, 1000);
+    }, 600);
     return () => clearInterval(interval);
-  }, [webcamRef]);
+  }, [webcamRef, auto]);
 
   const uploadHandler = useCallback((e) => {
     const reader = new FileReader();
@@ -64,6 +67,10 @@ const Camera = () => {
     );
   }, []);
 
+  const handleSwitch = useCallback((e) => {
+    setAuto(e.target.checked);
+  }, []);
+
   const videoConstraints = {
     width: 400,
     height: 400,
@@ -77,9 +84,20 @@ const Camera = () => {
         {/* <button onClick={printHandler}>Print</button> */}
         {/* <span>Or upload...</span> */}
         <div>
-          <input type="file" name="file" onChange={uploadHandler} />
+          <FormGroup>
+            <FormControlLabel
+              control={
+                <Switch
+                  label="Enable webcam"
+                  checked={auto}
+                  onChange={handleSwitch}
+                />
+              }
+            />
+          </FormGroup>
+          {!auto && <input type="file" name="file" onChange={uploadHandler} />}
           <hr />
-          <p>click to print</p>
+          <p>click image to print</p>
         </div>
       </div>
       <div>
@@ -112,14 +130,15 @@ const Camera = () => {
         onClick={printHandler}
       />
 
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        videoConstraints={videoConstraints}
-        className={style.video}
-      />
-
+      {auto && (
+        <Webcam
+          audio={false}
+          ref={webcamRef}
+          screenshotFormat="image/jpeg"
+          videoConstraints={videoConstraints}
+          className={style.video}
+        />
+      )}
       {imgSrc && <img width="0" src={imgSrc} />}
     </div>
   );
