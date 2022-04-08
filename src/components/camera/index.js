@@ -6,7 +6,6 @@ import { useOpenCv } from "opencv-react";
 
 const Camera = () => {
   const webcamRef = useRef(null);
-
   const [imgSrc, setImgSrc] = useState(null);
   const { loaded, cv } = useOpenCv();
 
@@ -25,21 +24,22 @@ const Camera = () => {
       cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY);
       cv.Canny(src, dst, 130, 220, 3, true);
       cv.bitwise_not(dst, invert);
-      cv.imshow("canvas", dst);
+      cv.imshow("canvas", invert);
+      cv.imshow("canvas-invert", dst);
 
-      src.delete();
-      dst.delete();
+      // src.delete();
+      // dst.delete();
     }
   }, [cv, imgSrc]);
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
     setImgSrc(imageSrc);
-  }, [webcamRef, setImgSrc]);
+  }, []);
 
   const videoConstraints = {
-    width: 600,
-    height: 600,
+    width: 400,
+    height: 400,
     facingMode: "user",
   };
 
@@ -51,9 +51,13 @@ const Camera = () => {
         screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}
       />
-      <button onClick={capture}>Capture photo</button>
-      {imgSrc && <img src={imgSrc} />}
-      <canvas id="canvas" width="600" height="600" />;
+      {imgSrc && <img width="0" src={imgSrc} />}
+      <canvas id="canvas" width="400" height="400" />
+      <canvas id="canvas-invert" width="400" height="400" />
+
+      <div>
+        <button onClick={capture}>Capture photo</button>
+      </div>
     </>
   );
 };
