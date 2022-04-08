@@ -9,7 +9,7 @@ const Camera = () => {
   const [imgSrc, setImgSrc] = useState(null);
   const { loaded, cv } = useOpenCv();
   const [lowThreshold, setLowThreshold] = useState(200);
-  const [highThreshold, setHighThreshold] = useState(230);
+  const [highThreshold, setHighThreshold] = useState(255);
 
   useEffect(() => {
     if (cv && imgSrc) {
@@ -24,7 +24,7 @@ const Camera = () => {
 
       cv.GaussianBlur(src, dst, ksize, 0, 0, cv.BORDER_DEFAULT);
       cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY);
-      cv.Canny(src, dst, lowThreshold, highThreshold, 3, true);
+      cv.Canny(src, dst, lowThreshold, highThreshold, 3, false);
       cv.bitwise_not(dst, invert);
       cv.imshow("canvas-invert", invert);
 
@@ -64,26 +64,13 @@ const Camera = () => {
 
   return (
     <>
-      <Webcam
-        audio={false}
-        ref={webcamRef}
-        screenshotFormat="image/jpeg"
-        videoConstraints={videoConstraints}
-      />
-
-      {imgSrc && <img width="0" src={imgSrc} />}
-
-      {/* <canvas id="canvas" width="400" height="400" /> */}
-      <canvas id="canvas-invert" width="400" height="400" />
-
       <div>
-        <button onClick={captureHandler}>Capture photo</button>
-        <div>
+        <button onClick={captureHandler}>Capture portrait</button>
+        {/* <div>
           <p>Or upload...</p>
           <input type="file" name="file" onChange={uploadHandler} />
-        </div>
+        </div> */}
       </div>
-
       <div>
         <label>Low</label>
         <input
@@ -108,6 +95,16 @@ const Camera = () => {
       <div>
         <button onClick={printHandler}>Print</button>
       </div>
+
+      <canvas id="canvas-invert" width="400" height="0" />
+      <Webcam
+        audio={false}
+        ref={webcamRef}
+        screenshotFormat="image/jpeg"
+        videoConstraints={videoConstraints}
+      />
+
+      {imgSrc && <img width="0" src={imgSrc} />}
     </>
   );
 };

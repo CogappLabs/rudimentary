@@ -1,10 +1,11 @@
 import { OpenCvProvider } from "opencv-react";
-import { h } from "preact";
-
 import Camera from "./camera";
+import Header from "./header";
+import "style/index.css";
 
 const App = () => (
   <div id="app">
+    <Header />
     <OpenCvProvider>
       <Camera />
     </OpenCvProvider>
