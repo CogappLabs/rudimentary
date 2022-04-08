@@ -1,6 +1,6 @@
 import { h } from "preact";
 import { useState, useRef, useCallback, useEffect } from "preact/hooks";
-// import style from "./style.css";
+import style from "./style.css";
 import Webcam from "react-webcam";
 import { useOpenCv } from "opencv-react";
 
@@ -38,6 +38,14 @@ const Camera = () => {
     setImgSrc(src);
   }, []);
 
+  // Capture an image every second.
+  useEffect(() => {
+    const interval = setInterval(() => {
+      captureHandler();
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [webcamRef]);
+
   const uploadHandler = useCallback((e) => {
     const reader = new FileReader();
     reader.readAsDataURL(e.target.files[0]);
@@ -63,17 +71,21 @@ const Camera = () => {
   };
 
   return (
-    <>
-      <div>
-        <button onClick={captureHandler}>Capture portrait</button>
-        {/* <div>
-          <p>Or upload...</p>
+    <div className={style.camera}>
+      <div className={style.controls}>
+        {/* <button onClick={captureHandler}>Capture portrait</button> */}
+        {/* <button onClick={printHandler}>Print</button> */}
+        {/* <span>Or upload...</span> */}
+        <div>
           <input type="file" name="file" onChange={uploadHandler} />
-        </div> */}
+          <hr />
+          <p>click to print</p>
+        </div>
       </div>
       <div>
         <label>Low</label>
         <input
+          className={style.slider}
           type="range"
           min="0"
           max="255"
@@ -84,6 +96,7 @@ const Camera = () => {
       <div>
         <label>High</label>
         <input
+          className={style.slider}
           type="range"
           min="0"
           max="255"
@@ -92,20 +105,23 @@ const Camera = () => {
         />
       </div>
 
-      <div>
-        <button onClick={printHandler}>Print</button>
-      </div>
+      <canvas
+        id="canvas-invert"
+        width="400"
+        height="0"
+        onClick={printHandler}
+      />
 
-      <canvas id="canvas-invert" width="400" height="0" />
       <Webcam
         audio={false}
         ref={webcamRef}
         screenshotFormat="image/jpeg"
         videoConstraints={videoConstraints}
+        className={style.video}
       />
 
       {imgSrc && <img width="0" src={imgSrc} />}
-    </>
+    </div>
   );
 };
 
