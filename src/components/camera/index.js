@@ -8,6 +8,10 @@ const Camera = () => {
   const webcamRef = useRef(null);
   const [imgSrc, setImgSrc] = useState(null);
   const { loaded, cv } = useOpenCv();
+  // input slider for low threshold
+  const [lowThreshold, setLowThreshold] = useState(110);
+  // input slider for high threshold
+  const [highThreshold, setHighThreshold] = useState(230);
 
   useEffect(() => {
     if (cv && imgSrc) {
@@ -22,15 +26,14 @@ const Camera = () => {
 
       cv.GaussianBlur(src, dst, ksize, 0, 0, cv.BORDER_DEFAULT);
       cv.cvtColor(src, dst, cv.COLOR_RGB2GRAY);
-      cv.Canny(src, dst, 130, 220, 3, true);
+      cv.Canny(src, dst, lowThreshold, highThreshold, 3, true);
       cv.bitwise_not(dst, invert);
-      cv.imshow("canvas", invert);
       cv.imshow("canvas-invert", dst);
 
-      // src.delete();
-      // dst.delete();
+      src.delete();
+      dst.delete();
     }
-  }, [cv, imgSrc]);
+  }, [cv, imgSrc, lowThreshold, highThreshold]);
 
   const capture = useCallback(() => {
     const imageSrc = webcamRef.current.getScreenshot();
@@ -57,6 +60,27 @@ const Camera = () => {
 
       <div>
         <button onClick={capture}>Capture photo</button>
+      </div>
+
+      <div>
+        <label>Low</label>
+        <input
+          type="range"
+          min="0"
+          max="255"
+          value={lowThreshold}
+          onChange={(e) => setLowThreshold(parseInt(e.target.value, 10))}
+        />
+      </div>
+      <div>
+        <label>High</label>
+        <input
+          type="range"
+          min="0"
+          max="255"
+          value={highThreshold}
+          onChange={(e) => setHighThreshold(parseInt(e.target.value, 10))}
+        />
       </div>
     </>
   );
